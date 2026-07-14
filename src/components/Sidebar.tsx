@@ -35,7 +35,10 @@ export default function Sidebar({ current, onChange, open, onClose }: Props) {
         {/* Brand */}
         <div className="flex items-center gap-3 px-5 py-5">
           <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center flex-shrink-0 shadow-lg shadow-teal-500/20">
-            <Zap size={20} className="text-zinc-900 fill-zinc-900" strokeWidth={2.5} />
+           // Sidebar.tsx — replace the gradient/Zap logo block with:
+<div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-teal-500/20 overflow-hidden">
+  <img src="/logo.png" alt="Endless Electrical" className="w-full h-full object-contain" />
+</div>
           </div>
           <div className="min-w-0 flex-1">
             <div className="text-white font-bold text-sm leading-tight truncate">Endless Electrical</div>
