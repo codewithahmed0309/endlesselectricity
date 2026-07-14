@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Plus, Pencil, Trash2, X, Check, Package, Tag, Settings2, Search, Camera } from 'lucide-react';
-import { supabase, DbProduct, DbCategory } from '../lib/supabase';
+import { supabase, DbProduct, DbCategory, DbCompany } from '../lib/supabase';
 
 function fmt(n: number) {
   return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -41,6 +41,16 @@ export default function Inventory() {
   const [useCustomCategory, setUseCustomCategory] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [search, setSearch] = useState('');
+
+  const [companies, setCompanies] = useState<DbCompany[]>([]);
+  const [companiesUnavailable, setCompaniesUnavailable] = useState(false);
+  const [useCustomCompany, setUseCustomCompany] = useState(false);
+  const [activeCompany, setActiveCompany] = useState<string>('All');
+
+  const [showCompanyModal, setShowCompanyModal] = useState(false);
+  const [newCompanyName, setNewCompanyName] = useState('');
+  const [companyErr, setCompanyErr] = useState('');
+  const [companySaving, setCompanySaving] = useState(false);
 
   const [showCatModal, setShowCatModal] = useState(false);
   const [newCatName, setNewCatName]     = useState('');
@@ -87,53 +97,75 @@ export default function Inventory() {
     setCategories(data ?? []);
   }
 
+  async function loadCompanies() {
+    const { data, error } = await supabase
+      .from('companies')
+      .select('*')
+      .order('name', { ascending: true });
+
+    if (error) {
+      console.error(error);
+      setCompaniesUnavailable(true);
+      return;
+    }
+    setCompanies(data ?? []);
+  }
+
   async function loadAll() {
     setLoading(true);
-    await Promise.all([loadProducts(), loadCategories()]);
+    await Promise.all([loadProducts(), loadCategories(), loadCompanies()]);
     setLoading(false);
   }
 
   useEffect(() => { loadAll(); }, []);
 
   const categoryNames = useMemo(() => categories.map(c => c.name), [categories]);
+  const companyNames = useMemo(() => companies.map(c => c.name), [companies]);
 
   const filteredProducts = useMemo(() => {
     let list = products;
     if (activeCategory === 'Uncategorized') list = list.filter(p => !p.category);
     else if (activeCategory !== 'All') list = list.filter(p => p.category === activeCategory);
 
+    if (activeCompany === 'No Company') list = list.filter(p => !p.company);
+    else if (activeCompany !== 'All') list = list.filter(p => p.company === activeCompany);
+
     const q = search.trim().toLowerCase();
     if (q) {
       list = list.filter(p =>
         p.name.toLowerCase().includes(q) ||
         (p.hsn_sac || '').toLowerCase().includes(q) ||
-        (p.category || '').toLowerCase().includes(q)
+        (p.category || '').toLowerCase().includes(q) ||
+        (p.company || '').toLowerCase().includes(q)
       );
     }
     return list;
-  }, [products, activeCategory, search]);
+  }, [products, activeCategory, activeCompany, search]);
 
   const lowStockCount = useMemo(() => products.filter(p => Number(p.stock_qty) <= 0).length, [products]);
 
   function openAdd() {
-    setEditing(null); setForm(emptyForm()); setUseCustomCategory(false); setErr(''); setShowModal(true);
+    setEditing(null); setForm(emptyForm());
+    setUseCustomCategory(false); setUseCustomCompany(false);
+    setErr(''); setShowModal(true);
   }
   function openEdit(p: DbProduct) {
-  setEditing(p);
-  setForm({
-    name: p.name,
-    company: p.company ?? '',
-    hsn_sac: p.hsn_sac,
-    rate: p.rate,
-    original_rate: p.original_rate,
-    unit: p.unit,
-    stock_qty: p.stock_qty,
-    description: p.description ?? '',
-    category: p.category ?? '',
-  });
-  setUseCustomCategory(!!p.category && !categoryNames.includes(p.category));
-  setErr(''); setShowModal(true);
-}
+    setEditing(p);
+    setForm({
+      name: p.name,
+      company: p.company ?? '',
+      hsn_sac: p.hsn_sac,
+      rate: p.rate,
+      original_rate: p.original_rate,
+      unit: p.unit,
+      stock_qty: p.stock_qty,
+      description: p.description ?? '',
+      category: p.category ?? '',
+    });
+    setUseCustomCategory(!!p.category && !categoryNames.includes(p.category));
+    setUseCustomCompany(!!p.company && !companyNames.includes(p.company));
+    setErr(''); setShowModal(true);
+  }
 
   async function handleSave() {
     if (!form.name.trim()) { setErr('Product name is required.'); return; }
@@ -144,6 +176,13 @@ export default function Inventory() {
     if (cat && !categoriesUnavailable && !categoryNames.includes(cat)) {
       const { error: catError } = await supabase.from('categories').insert({ name: cat });
       if (!catError) await loadCategories();
+    }
+
+    // If a brand-new company was typed in, persist it to the companies table too.
+    const comp = (form.company || '').trim();
+    if (comp && !companiesUnavailable && !companyNames.includes(comp)) {
+      const { error: compError } = await supabase.from('companies').insert({ name: comp });
+      if (!compError) await loadCompanies();
     }
 
     const { error } = editing
@@ -194,6 +233,37 @@ export default function Inventory() {
     loadAll();
   }
 
+  // ── Company management (create / delete) ───────────────────────────────
+  async function addCompany() {
+    const name = newCompanyName.trim();
+    if (!name) return;
+    if (companyNames.some(c => c.toLowerCase() === name.toLowerCase())) {
+      setCompanyErr('That company already exists.');
+      return;
+    }
+    setCompanySaving(true); setCompanyErr('');
+    const { error } = await supabase.from('companies').insert({ name });
+    setCompanySaving(false);
+    if (error) { setCompanyErr(error.message); return; }
+    setNewCompanyName('');
+    loadCompanies();
+  }
+
+  async function deleteCompany(comp: DbCompany) {
+    const inUse = products.filter(p => p.company === comp.name).length;
+    const msg = inUse > 0
+      ? `"${comp.name}" is used by ${inUse} product${inUse > 1 ? 's' : ''}. Delete it anyway? Those products will lose their company.`
+      : `Delete company "${comp.name}"?`;
+    if (!confirm(msg)) return;
+
+    if (inUse > 0) {
+      await supabase.from('products').update({ company: null }).eq('company', comp.name);
+    }
+    await supabase.from('companies').delete().eq('id', comp.id);
+    if (activeCompany === comp.name) setActiveCompany('All');
+    loadAll();
+  }
+
   const inp = 'w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white';
   const lbl = 'text-xs font-medium text-gray-500 mb-0.5 block';
 
@@ -213,6 +283,7 @@ export default function Inventory() {
   }
 
   const filterTabs = ['All', ...categoryNames, 'Uncategorized'];
+  const companyFilterTabs = ['All', ...companyNames, 'No Company'];
 
   // ── Scan Bill (stock in/out) ─────────────────────────────────────────────
   const [showScanModal, setShowScanModal] = useState(false);
@@ -269,7 +340,7 @@ export default function Inventory() {
             {products.length} products{lowStockCount > 0 && <span className="text-red-500"> · {lowStockCount} out of stock</span>}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-lg px-3 py-1.5">
             <Search size={14} className="text-gray-400" />
             <input
@@ -285,6 +356,14 @@ export default function Inventory() {
               className="flex items-center gap-1.5 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 text-sm font-semibold px-3.5 py-2 rounded-lg transition-colors"
             >
               <Settings2 size={15} /> Categories
+            </button>
+          )}
+          {!companiesUnavailable && (
+            <button
+              onClick={() => { setShowCompanyModal(true); setCompanyErr(''); setNewCompanyName(''); }}
+              className="flex items-center gap-1.5 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 text-sm font-semibold px-3.5 py-2 rounded-lg transition-colors"
+            >
+              <Settings2 size={15} /> Companies
             </button>
           )}
           <button
@@ -313,6 +392,24 @@ export default function Inventory() {
           >
             <Tag size={11} />
             {cat}
+          </button>
+        ))}
+      </div>
+
+      {/* Company filter tabs */}
+      <div className="flex flex-wrap gap-1.5">
+        {companyFilterTabs.map(comp => (
+          <button
+            key={comp}
+            onClick={() => setActiveCompany(comp)}
+            className={`flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+              activeCompany === comp
+                ? 'bg-gray-900 text-white border-gray-900'
+                : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+            }`}
+          >
+            <Tag size={11} />
+            {comp}
           </button>
         ))}
       </div>
@@ -447,6 +544,58 @@ export default function Inventory() {
         </div>
       )}
 
+      {/* Manage Companies modal */}
+      {showCompanyModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+              <h2 className="font-bold text-gray-900 text-sm">Manage Companies</h2>
+              <button onClick={() => setShowCompanyModal(false)} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+            </div>
+            <div className="p-5 space-y-3">
+              {companyErr && <div className="text-xs text-red-600 bg-red-50 rounded px-3 py-2">{companyErr}</div>}
+              <div className="flex gap-2">
+                <input
+                  className={inp}
+                  value={newCompanyName}
+                  onChange={e => setNewCompanyName(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') addCompany(); }}
+                  placeholder="e.g. Havells"
+                />
+                <button
+                  onClick={addCompany}
+                  disabled={companySaving}
+                  className="flex items-center gap-1 text-sm font-semibold bg-teal-600 hover:bg-teal-700 text-white rounded-lg px-3 disabled:opacity-50 whitespace-nowrap"
+                >
+                  <Plus size={14} /> Add
+                </button>
+              </div>
+              <div className="max-h-64 overflow-y-auto divide-y divide-gray-50 border border-gray-100 rounded-lg">
+                {companies.length === 0 ? (
+                  <div className="py-8 text-center text-sm text-gray-400">No companies yet.</div>
+                ) : (
+                  companies.map(comp => (
+                    <div key={comp.id} className="flex items-center justify-between px-3 py-2">
+                      <span className="text-sm text-gray-700">{comp.name}</span>
+                      <button
+                        onClick={() => deleteCompany(comp)}
+                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        title="Delete company"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+            <div className="px-5 py-4 border-t border-gray-100 flex justify-end">
+              <button onClick={() => setShowCompanyModal(false)} className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Done</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Add / Edit Product Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
@@ -455,18 +604,48 @@ export default function Inventory() {
               <h2 className="font-bold text-gray-900 text-sm">{editing ? 'Edit Product' : 'Add Product'}</h2>
               <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
             </div>
-         <div className="p-5 space-y-3">
-  {err && <div className="text-xs text-red-600 bg-red-50 rounded px-3 py-2">{err}</div>}
-  <div>
-    <label className={lbl}>Product Name *</label>
-    <input className={inp} value={form.name} onChange={e => f('name', e.target.value)} placeholder="e.g. MCB 32A" />
-  </div>
-  <div>
-    <label className={lbl}>Company</label>
-    <input className={inp} value={form.company ?? ''} onChange={e => f('company', e.target.value)} placeholder="e.g. Havells" />
-  </div>
-  <div>
-    <label className={lbl}>Category</label>
+            <div className="p-5 space-y-3">
+              {err && <div className="text-xs text-red-600 bg-red-50 rounded px-3 py-2">{err}</div>}
+              <div>
+                <label className={lbl}>Product Name *</label>
+                <input className={inp} value={form.name} onChange={e => f('name', e.target.value)} placeholder="e.g. MCB 32A" />
+              </div>
+              <div>
+                <label className={lbl}>Company</label>
+                {!useCustomCompany ? (
+                  <select
+                    className={inp}
+                    value={form.company || ''}
+                    onChange={e => {
+                      if (e.target.value === '__custom__') { setUseCustomCompany(true); f('company', ''); }
+                      else f('company', e.target.value);
+                    }}
+                  >
+                    <option value="">No Company</option>
+                    {companyNames.map(c => <option key={c} value={c}>{c}</option>)}
+                    <option value="__custom__">+ Add new company…</option>
+                  </select>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      autoFocus
+                      className={inp}
+                      value={form.company || ''}
+                      onChange={e => f('company', e.target.value)}
+                      placeholder="e.g. Havells"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setUseCustomCompany(false)}
+                      className="text-xs font-medium text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg px-2.5 whitespace-nowrap"
+                    >
+                      Use list
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className={lbl}>Category</label>
                 {!useCustomCategory ? (
                   <select
                     className={inp}
@@ -552,7 +731,7 @@ export default function Inventory() {
         ) : filteredProducts.length === 0 ? (
           <div className="py-16 text-center">
             <Tag size={40} className="mx-auto text-gray-300 mb-3" />
-            <p className="text-sm text-gray-500">No products in this category yet.</p>
+            <p className="text-sm text-gray-500">No products match these filters.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -572,21 +751,21 @@ export default function Inventory() {
               <tbody className="divide-y divide-gray-50">
                 {filteredProducts.map(p => (
                   <tr key={p.id} className="hover:bg-gray-50 transition-colors">
-                   <td className="px-5 py-3">
-  <div className="font-medium text-gray-800">{p.name}</div>
+                    <td className="px-5 py-3">
+                      <div className="font-medium text-gray-800">{p.name}</div>
 
-  {p.company && (
-    <div className="text-xs text-teal-600 mt-0.5 font-medium">
-      {p.company}
-    </div>
-  )}
+                      {p.company && (
+                        <div className="text-xs text-teal-600 mt-0.5 font-medium">
+                          {p.company}
+                        </div>
+                      )}
 
-  {p.description && (
-    <div className="text-xs text-gray-400 mt-0.5">
-      {p.description}
-    </div>
-  )}
-</td>
+                      {p.description && (
+                        <div className="text-xs text-gray-400 mt-0.5">
+                          {p.description}
+                        </div>
+                      )}
+                    </td>
                     <td className="px-5 py-3">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${categoryColor(p.category)}`}>
                         {p.category || 'Uncategorized'}
