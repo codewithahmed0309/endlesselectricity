@@ -558,10 +558,21 @@ export default function Inventory() {
               <tbody className="divide-y divide-gray-50">
                 {filteredProducts.map(p => (
                   <tr key={p.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3">
-                      <div className="font-medium text-gray-800">{p.name}</div>
-                      {p.description && <div className="text-xs text-gray-400 mt-0.5">{p.description}</div>}
-                    </td>
+                   <td className="px-5 py-3">
+  <div className="font-medium text-gray-800">{p.name}</div>
+
+  {p.company && (
+    <div className="text-xs text-teal-600 mt-0.5 font-medium">
+      {p.company}
+    </div>
+  )}
+
+  {p.description && (
+    <div className="text-xs text-gray-400 mt-0.5">
+      {p.description}
+    </div>
+  )}
+</td>
                     <td className="px-5 py-3">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${categoryColor(p.category)}`}>
                         {p.category || 'Uncategorized'}
