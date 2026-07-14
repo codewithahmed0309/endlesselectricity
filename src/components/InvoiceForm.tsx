@@ -188,7 +188,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
             <input className={inputCls()} value={data.paymentTerms} onChange={e => set({ paymentTerms: e.target.value })} placeholder="Advance" />
           </div>
         </div>
-        <div className="grid grid-cols-4 gap-2 mb-2">
+        <div className="grid grid-cols-2 gap-2 mb-2">
           <div>
             <label className={labelCls()}>Transporter Name</label>
             <input className={inputCls()} value={data.transporterName} onChange={e => set({ transporterName: e.target.value })} />
@@ -213,7 +213,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
       {/* Receiver (Bill To) */}
       <section>
         <h3 className={sectionTitleCls()}>Receiver (Bill To)</h3>
-        <div className="grid grid-cols-4 gap-2 mb-2">
+        <div className="grid grid-cols-2 gap-2 mb-2">
           <div>
             <label className={labelCls()}>Customer / Firm Name</label>
             <input className={inputCls()} value={data.customerName} onChange={e => set({ customerName: e.target.value })} placeholder="M/S Ex-Protecta" />
@@ -227,7 +227,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
           <label className={labelCls()}>Address</label>
           <input className={inputCls()} value={data.customerAddress} onChange={e => set({ customerAddress: e.target.value })} placeholder="305&306, GIDC, Vithal Udhyognagar, Anand 388001" />
         </div>
-        <div className="grid grid-cols-4 gap-2 mb-2">
+        <div className="grid grid-cols-2 gap-2 mb-2">
           <div>
             <label className={labelCls()}>GSTIN/UIN</label>
             <input className={inputCls()} value={data.customerGstin} onChange={e => set({ customerGstin: e.target.value })} placeholder="24AAAFE4816E1ZY" />
@@ -271,7 +271,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
               <label className={labelCls()}>Address</label>
               <input className={inputCls()} value={data.consigneeAddress} onChange={e => set({ consigneeAddress: e.target.value })} />
             </div>
-            <div className="grid grid-cols-4 gap-2 mb-2">
+            <div className="grid grid-cols-2 gap-2 mb-2">
               <div>
                 <label className={labelCls()}>GSTIN/UIN</label>
                 <input className={inputCls()} value={data.consigneeGstin} onChange={e => set({ consigneeGstin: e.target.value })} />
@@ -298,7 +298,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
       {/* Dispatch From */}
       <section>
         <h3 className={sectionTitleCls()}>Dispatch From</h3>
-        <div className="grid grid-cols-4 gap-2 mb-2">
+        <div className="grid grid-cols-5 gap-2 mb-2">
           <div>
             <label className={labelCls()}>Name / Store</label>
             <input className={inputCls()} value={data.dispatchName} onChange={e => set({ dispatchName: e.target.value })} placeholder="Store Name" />
@@ -311,15 +311,13 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
             <label className={labelCls()}>City</label>
             <input className={inputCls()} value={data.dispatchCity} onChange={e => set({ dispatchCity: e.target.value })} placeholder="City" />
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className={labelCls()}>State</label>
-              <input className={inputCls()} value={data.dispatchState} onChange={e => set({ dispatchState: e.target.value })} placeholder="GUJARAT" />
-            </div>
-            <div>
-              <label className={labelCls()}>PIN</label>
-              <input className={inputCls()} value={data.dispatchPincode} onChange={e => set({ dispatchPincode: e.target.value })} placeholder="388001" />
-            </div>
+          <div>
+            <label className={labelCls()}>State</label>
+            <input className={inputCls()} value={data.dispatchState} onChange={e => set({ dispatchState: e.target.value })} placeholder="GUJARAT" />
+          </div>
+          <div>
+            <label className={labelCls()}>PIN</label>
+            <input className={inputCls()} value={data.dispatchPincode} onChange={e => set({ dispatchPincode: e.target.value })} placeholder="388001" />
           </div>
         </div>
         <div>
@@ -339,26 +337,22 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
                 <button
                   onClick={() => removeItem(item.id)}
                   className="text-red-400 hover:text-red-600 transition-colors"
+                  type="button"
                 >
                   <Trash2 size={14} />
                 </button>
               </div>
               <div className="grid grid-cols-4 gap-2 mb-2">
                 <div>
-  <label className={labelCls()}>Item Code</label>
-  <input
-    className={inputCls()}
-    value={item.itemCode}
-    onChange={(e) =>
-      updateItem(item.id, {
-        itemCode: e.target.value,
-      })
-    }
-    placeholder="EX-1001"
-  />
-</div>
+                  <label className={labelCls()}>Item Code</label>
+                  <input
+                    className={inputCls()}
+                    value={item.itemCode}
+                    onChange={(e) => updateItem(item.id, { itemCode: e.target.value })}
+                    placeholder="EX-1001"
+                  />
+                </div>
                 <div className="col-span-2">
-                  
                   <label className={labelCls()}>Item Name</label>
                   {products.length > 0 ? (
                     <div className="relative">
@@ -386,12 +380,12 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
                   <label className={labelCls()}>HSN / SAC</label>
                   <input className={inputCls()} value={item.hsnSac} onChange={e => updateItem(item.id, { hsnSac: e.target.value })} placeholder="HSN code" />
                 </div>
+              </div>
+              <div className="grid grid-cols-6 gap-2 mb-2">
                 <div>
                   <label className={labelCls()}>Unit</label>
                   <input className={inputCls()} value={item.unit} onChange={e => updateItem(item.id, { unit: e.target.value })} placeholder="UNT / KG / PCS" />
                 </div>
-              </div>
-              <div className="grid grid-cols-5 gap-2 mb-2">
                 <div>
                   <label className={labelCls()}>Original Rate</label>
                   <input
@@ -496,6 +490,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
         </div>
         <button
           onClick={addItem}
+          type="button"
           className="mt-2 flex items-center gap-1.5 text-xs font-medium text-teal-600 hover:text-teal-700 border border-teal-200 hover:border-teal-400 rounded px-3 py-1.5 transition-colors"
         >
           <Plus size={13} /> Add Item
@@ -535,7 +530,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
         <label className="cursor-pointer block">
           <div className="w-36 h-20 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center bg-gray-50 hover:bg-teal-50 hover:border-teal-300 transition-colors overflow-hidden">
             {data.signatureUrl ? (
-              <img src={data.signatureUrl} alt="signature" className="w-full h-full object-contain p-1" />
+              <img src={data.signatureUrl} alt="signature" className="w-full h-full object-contain" />
             ) : (
               <>
                 <Upload size={16} className="text-gray-400" />
