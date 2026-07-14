@@ -74,21 +74,12 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
       <div className="grid border-b border-gray-300" style={{ gridTemplateColumns: '1fr 1fr' }}>
         {/* Company */}
         <div className="flex items-start gap-2 p-2 border-r border-gray-300">
-          {data.logoUrl ? (
-            <img
-              src={data.logoUrl}
-              alt="logo"
-              className="flex-shrink-0 object-contain"
-              style={{ width: '60px', height: '60px' }}
-            />
-          ) : (
-            <div
-              className="flex-shrink-0 bg-gray-100 border border-dashed border-gray-400 flex items-center justify-center text-gray-400 text-center"
-              style={{ width: '60px', height: '60px', fontSize: '9px' }}
-            >
-              Logo
-            </div>
-          )}
+          <img
+  src="/logo.png"   // Change to your actual file name
+  alt="Endless Electrical"
+  className="flex-shrink-0 object-contain"
+  style={{ width: '60px', height: '60px' }}
+/>
           <div style={{ fontSize: '10px' }}>
             <div className="font-bold" style={{ fontSize: '11px' }}>
               {data.companyName || 'Company Name'}
