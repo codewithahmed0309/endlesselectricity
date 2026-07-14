@@ -2,6 +2,7 @@ export interface InvoiceItem {
   id: string;
   name: string;
   hsnSac: string;
+  itemCode: string;
   rate: number;
   originalRate: number;
   qty: number;
