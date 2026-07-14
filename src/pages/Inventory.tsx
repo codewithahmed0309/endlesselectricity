@@ -24,7 +24,7 @@ const SEED_CATEGORIES = [
 type FormState = Omit<DbProduct, 'id' | 'created_at'>;
 
 const emptyForm = (): FormState => ({
-  name: '', hsn_sac: '', rate: 0, original_rate: 0, unit: 'UNT', stock_qty: 0, description: '', category: '',
+  name: '', company: '', hsn_sac: '', rate: 0, original_rate: 0, unit: 'UNT', stock_qty: 0, description: '', category: '',
 });
 
 export default function Inventory() {
@@ -119,11 +119,21 @@ export default function Inventory() {
     setEditing(null); setForm(emptyForm()); setUseCustomCategory(false); setErr(''); setShowModal(true);
   }
   function openEdit(p: DbProduct) {
-    setEditing(p);
-    setForm({ name: p.name, hsn_sac: p.hsn_sac, rate: p.rate, original_rate: p.original_rate, unit: p.unit, stock_qty: p.stock_qty, description: p.description ?? '', category: p.category ?? '' });
-    setUseCustomCategory(!!p.category && !categoryNames.includes(p.category));
-    setErr(''); setShowModal(true);
-  }
+  setEditing(p);
+  setForm({
+    name: p.name,
+    company: p.company ?? '',
+    hsn_sac: p.hsn_sac,
+    rate: p.rate,
+    original_rate: p.original_rate,
+    unit: p.unit,
+    stock_qty: p.stock_qty,
+    description: p.description ?? '',
+    category: p.category ?? '',
+  });
+  setUseCustomCategory(!!p.category && !categoryNames.includes(p.category));
+  setErr(''); setShowModal(true);
+}
 
   async function handleSave() {
     if (!form.name.trim()) { setErr('Product name is required.'); return; }
@@ -445,14 +455,18 @@ export default function Inventory() {
               <h2 className="font-bold text-gray-900 text-sm">{editing ? 'Edit Product' : 'Add Product'}</h2>
               <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
             </div>
-            <div className="p-5 space-y-3">
-              {err && <div className="text-xs text-red-600 bg-red-50 rounded px-3 py-2">{err}</div>}
-              <div>
-                <label className={lbl}>Product Name *</label>
-                <input className={inp} value={form.name} onChange={e => f('name', e.target.value)} placeholder="e.g. MCB 32A" />
-              </div>
-              <div>
-                <label className={lbl}>Category</label>
+         <div className="p-5 space-y-3">
+  {err && <div className="text-xs text-red-600 bg-red-50 rounded px-3 py-2">{err}</div>}
+  <div>
+    <label className={lbl}>Product Name *</label>
+    <input className={inp} value={form.name} onChange={e => f('name', e.target.value)} placeholder="e.g. MCB 32A" />
+  </div>
+  <div>
+    <label className={lbl}>Company</label>
+    <input className={inp} value={form.company ?? ''} onChange={e => f('company', e.target.value)} placeholder="e.g. Havells" />
+  </div>
+  <div>
+    <label className={lbl}>Category</label>
                 {!useCustomCategory ? (
                   <select
                     className={inp}
