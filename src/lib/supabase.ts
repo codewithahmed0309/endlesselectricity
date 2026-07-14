@@ -23,7 +23,11 @@ export interface DbInvoice {
   notes: string | null;
   created_at: string;
 }
-
+export interface DbCompany {
+  id: string;
+  name: string;
+  created_at: string;
+}
 export interface DbCustomer {
   id: string;
   name: string;
