@@ -35,7 +35,7 @@ export default function Sidebar({ current, onChange, open, onClose }: Props) {
   {/* Brand */}
   <div className="flex items-center gap-3 p-4 border-b border-zinc-800">
     <img
-      src="/logo.png"
+      src="/favicon.svg"
       alt="Endless Electrical"
       className="h-12 w-auto object-contain flex-shrink-0"
     />
