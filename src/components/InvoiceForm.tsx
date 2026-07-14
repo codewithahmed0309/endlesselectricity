@@ -12,6 +12,7 @@ interface Props {
 function newItem(): InvoiceItem {
   return {
     id: crypto.randomUUID(),
+    itemCode: '',
     name: '',
     hsnSac: '',
     rate: 0,
