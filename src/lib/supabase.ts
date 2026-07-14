@@ -39,6 +39,7 @@ export interface DbCustomer {
 export interface DbProduct {
   id: string;
   name: string;
+   company: string | null;
   hsn_sac: string;
   rate: number;
   original_rate: number;
