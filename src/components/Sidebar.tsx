@@ -29,26 +29,34 @@ export default function Sidebar({ current, onChange, open, onClose }: Props) {
       )}
 
       <aside
-        className={`w-56 min-h-screen bg-zinc-900 flex flex-col flex-shrink-0 fixed md:static top-0 left-0 z-50 transition-transform duration-200 ease-out
-          ${open ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
-      >
-        {/* Brand */}
-<div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-teal-500/20 overflow-hidden">
-  <img src="/logo.png" alt="Endless Electrical" className="w-full h-full object-contain" />
-</div>
-    
-          <div className="min-w-0 flex-1">
-            <div className="text-white font-bold text-sm leading-tight truncate">Endless Electrical</div>
-            <div className="text-zinc-500 text-[10px] tracking-wide">INVOICE MANAGER</div>
-          </div>
-          {/* Close button — mobile only */}
-          <button
-            onClick={onClose}
-            className="md:hidden text-zinc-400 hover:text-white p-1 flex-shrink-0"
-          >
-            <X size={18} />
-          </button>
-        </div>
+  className={`w-56 min-h-screen bg-zinc-900 flex flex-col flex-shrink-0 fixed md:static top-0 left-0 z-50 transition-transform duration-200 ease-out
+    ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+>
+  {/* Brand */}
+  <div className="flex items-center gap-3 p-4 border-b border-zinc-800">
+    <img
+      src="/logo.png"
+      alt="Endless Electrical"
+      className="h-12 w-auto object-contain flex-shrink-0"
+    />
+
+    <div className="min-w-0 flex-1">
+      <div className="text-white font-bold text-sm leading-tight truncate">
+        Endless Electrical
+      </div>
+      <div className="text-zinc-500 text-[10px] tracking-wide">
+        INVOICE MANAGER
+      </div>
+    </div>
+
+    {/* Close button — mobile only */}
+    <button
+      onClick={onClose}
+      className="md:hidden text-zinc-400 hover:text-white p-1 flex-shrink-0"
+    >
+      <X size={18} />
+    </button>
+  </div>
 
         {/* Nav */}
         <nav className="flex-1 px-3 pt-2">
