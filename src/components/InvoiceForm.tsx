@@ -20,6 +20,9 @@ function newItem(): InvoiceItem {
     unit: 'UNT',
     discount: 0,
     amount: 0,
+    cgstRate: 9,
+    sgstRate: 9,
+    igstRate: 0,
   };
 }
 
@@ -33,6 +36,10 @@ function labelCls() {
 
 function inputCls() {
   return 'w-full border border-gray-200 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-teal-400 bg-white';
+}
+
+function sectionTitleCls() {
+  return 'text-xs font-bold uppercase tracking-wider text-teal-600 border-b border-teal-100 pb-1 mb-3';
 }
 
 export default function InvoiceForm({ data, onChange, products }: Props) {
@@ -94,9 +101,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
     <div className="space-y-5">
       {/* Company Details */}
       <section>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-teal-600 border-b border-teal-100 pb-1 mb-3">
-          Company Details
-        </h3>
+        <h3 className={sectionTitleCls()}>Company Details</h3>
         <div className="flex gap-3 items-start mb-3">
           <div className="flex-shrink-0">
             <label className={labelCls()}>Logo</label>
@@ -117,20 +122,34 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
           <div className="flex-1 grid grid-cols-1 gap-2">
             <div>
               <label className={labelCls()}>Company Name</label>
-              <input className={inputCls()} value={data.companyName} onChange={e => set({ companyName: e.target.value })} placeholder="Endless Electrical" />
+              <input className={inputCls()} value={data.companyName} onChange={e => set({ companyName: e.target.value })} placeholder="Endless Electricals" />
             </div>
             <div>
               <label className={labelCls()}>Address</label>
-              <input className={inputCls()} value={data.companyAddress} onChange={e => set({ companyAddress: e.target.value })} placeholder="Street, City, State, PIN" />
+              <input className={inputCls()} value={data.companyAddress} onChange={e => set({ companyAddress: e.target.value })} placeholder="GF 37 K-10 Arcade, 100FT Road, Opp DFA Cinema" />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className={labelCls()}>City / State</label>
-                <input className={inputCls()} value={data.companyCity} onChange={e => set({ companyCity: e.target.value })} placeholder="Mumbai, MH 400001" />
+                <input className={inputCls()} value={data.companyCity} onChange={e => set({ companyCity: e.target.value })} placeholder="Anand-388001 Gujarat, India" />
               </div>
               <div>
                 <label className={labelCls()}>Mobile</label>
-                <input className={inputCls()} value={data.companyMobile} onChange={e => set({ companyMobile: e.target.value })} placeholder="+91 98765 43210" />
+                <input className={inputCls()} value={data.companyMobile} onChange={e => set({ companyMobile: e.target.value })} placeholder="+91 9825538373" />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className={labelCls()}>Email</label>
+                <input className={inputCls()} value={data.companyEmail} onChange={e => set({ companyEmail: e.target.value })} placeholder="email@gmail.com" />
+              </div>
+              <div>
+                <label className={labelCls()}>GSTIN</label>
+                <input className={inputCls()} value={data.companyGstin} onChange={e => set({ companyGstin: e.target.value })} placeholder="24AAAFE4816E1ZY" />
+              </div>
+              <div>
+                <label className={labelCls()}>PAN</label>
+                <input className={inputCls()} value={data.companyPan} onChange={e => set({ companyPan: e.target.value })} placeholder="AFQPV8836E" />
               </div>
             </div>
           </div>
@@ -139,13 +158,11 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
 
       {/* Invoice Meta */}
       <section>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-teal-600 border-b border-teal-100 pb-1 mb-3">
-          Invoice Details
-        </h3>
-        <div className="grid grid-cols-3 gap-2">
+        <h3 className={sectionTitleCls()}>Invoice Details</h3>
+        <div className="grid grid-cols-3 gap-2 mb-2">
           <div>
             <label className={labelCls()}>Invoice #</label>
-            <input className={inputCls()} value={data.invoiceNumber} onChange={e => set({ invoiceNumber: e.target.value })} placeholder="INV-1" />
+            <input className={inputCls()} value={data.invoiceNumber} onChange={e => set({ invoiceNumber: e.target.value })} placeholder="G-013" />
           </div>
           <div>
             <label className={labelCls()}>Invoice Date</label>
@@ -156,30 +173,130 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
             <input type="date" className={inputCls()} value={data.dueDate} onChange={e => set({ dueDate: e.target.value })} />
           </div>
         </div>
-      </section>
-
-      {/* Customer Details */}
-      <section>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-teal-600 border-b border-teal-100 pb-1 mb-3">
-          Customer Details
-        </h3>
+        <div className="grid grid-cols-3 gap-2 mb-2">
+          <div>
+            <label className={labelCls()}>P.O. No</label>
+            <input className={inputCls()} value={data.poNumber} onChange={e => set({ poNumber: e.target.value })} placeholder="00" />
+          </div>
+          <div>
+            <label className={labelCls()}>Order Date</label>
+            <input type="date" className={inputCls()} value={data.orderDate} onChange={e => set({ orderDate: e.target.value })} />
+          </div>
+          <div>
+            <label className={labelCls()}>Payment Terms</label>
+            <input className={inputCls()} value={data.paymentTerms} onChange={e => set({ paymentTerms: e.target.value })} placeholder="Advance" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          <div>
+            <label className={labelCls()}>Transporter Name</label>
+            <input className={inputCls()} value={data.transporterName} onChange={e => set({ transporterName: e.target.value })} />
+          </div>
+          <div>
+            <label className={labelCls()}>Vehicle No</label>
+            <input className={inputCls()} value={data.vehicleNumber} onChange={e => set({ vehicleNumber: e.target.value })} placeholder="GJ22YY4646" />
+          </div>
+        </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <label className={labelCls()}>Customer Name</label>
-            <input className={inputCls()} value={data.customerName} onChange={e => set({ customerName: e.target.value })} placeholder="Customer Full Name" />
+            <label className={labelCls()}>From</label>
+            <input className={inputCls()} value={data.fromLocation} onChange={e => set({ fromLocation: e.target.value })} placeholder="Anand" />
+          </div>
+          <div>
+            <label className={labelCls()}>To</label>
+            <input className={inputCls()} value={data.toLocation} onChange={e => set({ toLocation: e.target.value })} placeholder="V U N" />
+          </div>
+        </div>
+      </section>
+
+      {/* Receiver (Bill To) */}
+      <section>
+        <h3 className={sectionTitleCls()}>Receiver (Bill To)</h3>
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          <div>
+            <label className={labelCls()}>Customer / Firm Name</label>
+            <input className={inputCls()} value={data.customerName} onChange={e => set({ customerName: e.target.value })} placeholder="M/S Ex-Protecta" />
           </div>
           <div>
             <label className={labelCls()}>Phone Number</label>
             <input className={inputCls()} value={data.customerPhone} onChange={e => set({ customerPhone: e.target.value })} placeholder="9876543210" />
           </div>
         </div>
+        <div className="mb-2">
+          <label className={labelCls()}>Address</label>
+          <input className={inputCls()} value={data.customerAddress} onChange={e => set({ customerAddress: e.target.value })} placeholder="305&306, GIDC, Vithal Udhyognagar, Anand 388001" />
+        </div>
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          <div>
+            <label className={labelCls()}>GSTIN/UIN</label>
+            <input className={inputCls()} value={data.customerGstin} onChange={e => set({ customerGstin: e.target.value })} placeholder="24AAAFE4816E1ZY" />
+          </div>
+          <div>
+            <label className={labelCls()}>State Name</label>
+            <input className={inputCls()} value={data.customerStateName} onChange={e => set({ customerStateName: e.target.value })} placeholder="Gujarat -24" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className={labelCls()}>Contact Person</label>
+            <input className={inputCls()} value={data.customerContactPerson} onChange={e => set({ customerContactPerson: e.target.value })} placeholder="Hasmukhbhai" />
+          </div>
+          <div>
+            <label className={labelCls()}>Contact Number</label>
+            <input className={inputCls()} value={data.customerContactNumber} onChange={e => set({ customerContactNumber: e.target.value })} placeholder="9925300886" />
+          </div>
+        </div>
+      </section>
+
+      {/* Consignee (Ship To) */}
+      <section>
+        <h3 className={sectionTitleCls()}>Consignee (Ship To)</h3>
+        <label className="flex items-center gap-2 mb-3 text-sm text-gray-600">
+          <input
+            type="checkbox"
+            checked={data.sameAsReceiver}
+            onChange={e => set({ sameAsReceiver: e.target.checked })}
+            className="rounded border-gray-300 text-teal-600 focus:ring-teal-400"
+          />
+          Same as Receiver
+        </label>
+        {!data.sameAsReceiver && (
+          <>
+            <div className="mb-2">
+              <label className={labelCls()}>Consignee Name</label>
+              <input className={inputCls()} value={data.consigneeName} onChange={e => set({ consigneeName: e.target.value })} />
+            </div>
+            <div className="mb-2">
+              <label className={labelCls()}>Address</label>
+              <input className={inputCls()} value={data.consigneeAddress} onChange={e => set({ consigneeAddress: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-2 mb-2">
+              <div>
+                <label className={labelCls()}>GSTIN/UIN</label>
+                <input className={inputCls()} value={data.consigneeGstin} onChange={e => set({ consigneeGstin: e.target.value })} />
+              </div>
+              <div>
+                <label className={labelCls()}>State Name</label>
+                <input className={inputCls()} value={data.consigneeStateName} onChange={e => set({ consigneeStateName: e.target.value })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className={labelCls()}>Contact Person</label>
+                <input className={inputCls()} value={data.consigneeContactPerson} onChange={e => set({ consigneeContactPerson: e.target.value })} />
+              </div>
+              <div>
+                <label className={labelCls()}>Contact Number</label>
+                <input className={inputCls()} value={data.consigneeContactNumber} onChange={e => set({ consigneeContactNumber: e.target.value })} />
+              </div>
+            </div>
+          </>
+        )}
       </section>
 
       {/* Dispatch From */}
       <section>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-teal-600 border-b border-teal-100 pb-1 mb-3">
-          Dispatch From
-        </h3>
+        <h3 className={sectionTitleCls()}>Dispatch From</h3>
         <div className="grid grid-cols-2 gap-2 mb-2">
           <div>
             <label className={labelCls()}>Name / Store</label>
@@ -196,11 +313,11 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
           <div className="grid grid-cols-2 gap-2">
             <div>
               <label className={labelCls()}>State</label>
-              <input className={inputCls()} value={data.dispatchState} onChange={e => set({ dispatchState: e.target.value })} placeholder="MAHARASHTRA" />
+              <input className={inputCls()} value={data.dispatchState} onChange={e => set({ dispatchState: e.target.value })} placeholder="GUJARAT" />
             </div>
             <div>
               <label className={labelCls()}>PIN</label>
-              <input className={inputCls()} value={data.dispatchPincode} onChange={e => set({ dispatchPincode: e.target.value })} placeholder="402309" />
+              <input className={inputCls()} value={data.dispatchPincode} onChange={e => set({ dispatchPincode: e.target.value })} placeholder="388001" />
             </div>
           </div>
         </div>
@@ -212,9 +329,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
 
       {/* Items */}
       <section>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-teal-600 border-b border-teal-100 pb-1 mb-3">
-          Items
-        </h3>
+        <h3 className={sectionTitleCls()}>Items</h3>
         <div className="space-y-2">
           {data.items.map((item, idx) => (
             <div key={item.id} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
@@ -261,7 +376,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
                   <input className={inputCls()} value={item.unit} onChange={e => updateItem(item.id, { unit: e.target.value })} placeholder="UNT / KG / PCS" />
                 </div>
               </div>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-5 gap-2 mb-2">
                 <div>
                   <label className={labelCls()}>Original Rate</label>
                   <input
@@ -326,6 +441,41 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
                   </div>
                 </div>
               </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className={labelCls()}>CGST %</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={inputCls()}
+                    value={item.cgstRate || ''}
+                    onChange={e => updateItem(item.id, { cgstRate: parseFloat(e.target.value) || 0 })}
+                    placeholder="9"
+                  />
+                </div>
+                <div>
+                  <label className={labelCls()}>SGST %</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={inputCls()}
+                    value={item.sgstRate || ''}
+                    onChange={e => updateItem(item.id, { sgstRate: parseFloat(e.target.value) || 0 })}
+                    placeholder="9"
+                  />
+                </div>
+                <div>
+                  <label className={labelCls()}>IGST %</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className={inputCls()}
+                    value={item.igstRate || ''}
+                    onChange={e => updateItem(item.id, { igstRate: parseFloat(e.target.value) || 0 })}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -339,21 +489,19 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
 
       {/* Bank Details */}
       <section>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-teal-600 border-b border-teal-100 pb-1 mb-3">
-          Bank Details
-        </h3>
+        <h3 className={sectionTitleCls()}>Bank Details</h3>
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className={labelCls()}>Bank Name</label>
-            <input className={inputCls()} value={data.bankDetails.bankName} onChange={e => setBank({ bankName: e.target.value })} placeholder="ICICI Bank" />
+            <input className={inputCls()} value={data.bankDetails.bankName} onChange={e => setBank({ bankName: e.target.value })} placeholder="BANK OF BARODA" />
           </div>
           <div>
             <label className={labelCls()}>Account Number</label>
-            <input className={inputCls()} value={data.bankDetails.accountNumber} onChange={e => setBank({ accountNumber: e.target.value })} placeholder="123456789012" />
+            <input className={inputCls()} value={data.bankDetails.accountNumber} onChange={e => setBank({ accountNumber: e.target.value })} placeholder="46510208000210" />
           </div>
           <div>
             <label className={labelCls()}>IFSC Code</label>
-            <input className={inputCls()} value={data.bankDetails.ifscCode} onChange={e => setBank({ ifscCode: e.target.value })} placeholder="ICIC0001234" />
+            <input className={inputCls()} value={data.bankDetails.ifscCode} onChange={e => setBank({ ifscCode: e.target.value })} placeholder="BARB0AKROL" />
           </div>
           <div>
             <label className={labelCls()}>Branch</label>
@@ -368,9 +516,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
 
       {/* Signature */}
       <section>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-teal-600 border-b border-teal-100 pb-1 mb-3">
-          Signature
-        </h3>
+        <h3 className={sectionTitleCls()}>Signature</h3>
         <label className="cursor-pointer block">
           <div className="w-36 h-20 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center bg-gray-50 hover:bg-teal-50 hover:border-teal-300 transition-colors overflow-hidden">
             {data.signatureUrl ? (
@@ -386,11 +532,21 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
         </label>
       </section>
 
+      {/* Special Note */}
+      <section>
+        <h3 className={sectionTitleCls()}>Special Note</h3>
+        <textarea
+          className={inputCls() + ' resize-none'}
+          rows={2}
+          value={data.specialNotes}
+          onChange={e => set({ specialNotes: e.target.value })}
+          placeholder="Any special note for this invoice..."
+        />
+      </section>
+
       {/* Notes */}
       <section>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-teal-600 border-b border-teal-100 pb-1 mb-3">
-          Notes
-        </h3>
+        <h3 className={sectionTitleCls()}>Notes</h3>
         <textarea
           className={inputCls() + ' resize-none'}
           rows={3}
