@@ -188,7 +188,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
             <input className={inputCls()} value={data.paymentTerms} onChange={e => set({ paymentTerms: e.target.value })} placeholder="Advance" />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2 mb-2">
+        <div className="grid grid-cols-4 gap-2 mb-2">
           <div>
             <label className={labelCls()}>Transporter Name</label>
             <input className={inputCls()} value={data.transporterName} onChange={e => set({ transporterName: e.target.value })} />
@@ -213,7 +213,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
       {/* Receiver (Bill To) */}
       <section>
         <h3 className={sectionTitleCls()}>Receiver (Bill To)</h3>
-        <div className="grid grid-cols-2 gap-2 mb-2">
+        <div className="grid grid-cols-4 gap-2 mb-2">
           <div>
             <label className={labelCls()}>Customer / Firm Name</label>
             <input className={inputCls()} value={data.customerName} onChange={e => set({ customerName: e.target.value })} placeholder="M/S Ex-Protecta" />
@@ -227,7 +227,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
           <label className={labelCls()}>Address</label>
           <input className={inputCls()} value={data.customerAddress} onChange={e => set({ customerAddress: e.target.value })} placeholder="305&306, GIDC, Vithal Udhyognagar, Anand 388001" />
         </div>
-        <div className="grid grid-cols-2 gap-2 mb-2">
+        <div className="grid grid-cols-4 gap-2 mb-2">
           <div>
             <label className={labelCls()}>GSTIN/UIN</label>
             <input className={inputCls()} value={data.customerGstin} onChange={e => set({ customerGstin: e.target.value })} placeholder="24AAAFE4816E1ZY" />
@@ -271,7 +271,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
               <label className={labelCls()}>Address</label>
               <input className={inputCls()} value={data.consigneeAddress} onChange={e => set({ consigneeAddress: e.target.value })} />
             </div>
-            <div className="grid grid-cols-2 gap-2 mb-2">
+            <div className="grid grid-cols-4 gap-2 mb-2">
               <div>
                 <label className={labelCls()}>GSTIN/UIN</label>
                 <input className={inputCls()} value={data.consigneeGstin} onChange={e => set({ consigneeGstin: e.target.value })} />
@@ -298,7 +298,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
       {/* Dispatch From */}
       <section>
         <h3 className={sectionTitleCls()}>Dispatch From</h3>
-        <div className="grid grid-cols-2 gap-2 mb-2">
+        <div className="grid grid-cols-4 gap-2 mb-2">
           <div>
             <label className={labelCls()}>Name / Store</label>
             <input className={inputCls()} value={data.dispatchName} onChange={e => set({ dispatchName: e.target.value })} placeholder="Store Name" />
@@ -343,8 +343,22 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
                   <Trash2 size={14} />
                 </button>
               </div>
-              <div className="grid grid-cols-2 gap-2 mb-2">
+              <div className="grid grid-cols-4 gap-2 mb-2">
+                <div>
+  <label className={labelCls()}>Item Code</label>
+  <input
+    className={inputCls()}
+    value={item.itemCode}
+    onChange={(e) =>
+      updateItem(item.id, {
+        itemCode: e.target.value,
+      })
+    }
+    placeholder="EX-1001"
+  />
+</div>
                 <div className="col-span-2">
+                  
                   <label className={labelCls()}>Item Name</label>
                   {products.length > 0 ? (
                     <div className="relative">
