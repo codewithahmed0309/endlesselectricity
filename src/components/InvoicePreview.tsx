@@ -46,12 +46,20 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
   const emptyCount = Math.max(0, MIN_ROWS - rows.length);
 
   return (
-    <div
-      ref={ref}
-      id="invoice-preview"
-      className="bg-white text-black border-2 border-black"
-      style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '9.5px', minWidth: '620px', maxWidth: '620px' }}
-    >
+   <div
+  ref={ref}
+  id="invoice-preview"
+  className="bg-white text-black border border-black shadow-sm"
+  style={{
+    width: '210mm',
+    minHeight: '297mm',
+    margin: '0 auto',
+    padding: '8mm',
+    boxSizing: 'border-box',
+    fontFamily: 'Arial, Helvetica, sans-serif',
+    fontSize: '10px'
+  }}
+>
       {/* ── Header ── */}
       <div className="flex items-start justify-between border-b border-black px-3 py-2">
         <div className="flex items-start gap-2">
