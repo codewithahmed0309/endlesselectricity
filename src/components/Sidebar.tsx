@@ -36,7 +36,7 @@ export default function Sidebar({ current, onChange, open, onClose }: Props) {
 <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-teal-500/20 overflow-hidden">
   <img src="/logo.png" alt="Endless Electrical" className="w-full h-full object-contain" />
 </div>
-          </div>
+    
           <div className="min-w-0 flex-1">
             <div className="text-white font-bold text-sm leading-tight truncate">Endless Electrical</div>
             <div className="text-zinc-500 text-[10px] tracking-wide">INVOICE MANAGER</div>
