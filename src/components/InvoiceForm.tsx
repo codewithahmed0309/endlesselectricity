@@ -97,7 +97,6 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
       unit: product.unit,
       discount: disc,
       qty: 1,
-      isNoReturn: !!product.is_no_return,
     });
   };
 
