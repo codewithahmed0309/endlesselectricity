@@ -88,13 +88,31 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
                   <img src={data.logoUrl} alt="logo" style={{ width: '34px', height: '34px' }} className="object-contain flex-shrink-0" />
                 )}
                 <div>
-                  <div className="font-bold" style={{ fontSize: '13px' }}>{data.companyName}</div>
-                  <div className="mt-0.5">{data.companyAddress}</div>
-                  <div>{data.companyCity}</div>
-                  <div>GSTIN/UIN: {data.companyGstin}</div>
-                  <div>State Name: {data.companyCity}</div>
-                  <div>Contact: {data.companyMobile}{data.companyEmail ? `, ${data.companyEmail}` : ''}</div>
-                  {data.companyEmail && <div>E-Mail: {data.companyEmail}</div>}
+      <div className="font-bold" style={{ fontSize: '13px' }}>
+  ENDLESS ELECTRICAL
+</div>
+
+<div className="mt-0.5">
+  G/F 0.7,K-10,ARCADE,100ft ROAD,OPP DIYA CINEMA ANAND
+</div>
+
+<div>
+  GUJARAT - 388001
+</div>
+
+<div>
+  GSTIN/UIN: 24AFQPV8836E1ZU
+</div>
+
+
+
+<div>
+  Contact: +91 9825338373
+</div>
+
+<div>
+  E-Mail: endless98253@gmail.com
+</div>
 
                   <div className="mt-2">
                     <div className={LBL}>Consignee (Ship to)</div>
