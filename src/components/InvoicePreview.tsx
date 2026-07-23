@@ -18,6 +18,14 @@ function formatDate(d: string) {
 // Thin single-rule borders, small type — matches the classic tally-style
 // "Tax Invoice" format rather than a modern boxed/colored layout.
 const CELL = 'border border-black px-1.5 py-1 align-top';
+// Used only on the FIRST row of every section table below the first one.
+// Each section lives in its own <table>, so stacking them normally means
+// the bottom border of one table sits right next to the top border of the
+// next — two 1px lines back to back. That's what shows up as thick /
+// misaligned "overlapping" borders once the page is rasterized for PDF or
+// image export. Dropping the top border here means only ONE line ever
+// draws at each seam.
+const CELL_NT = 'border border-t-0 border-black px-1.5 py-1 align-top';
 const LBL = 'text-[9px] text-gray-600';
 
 const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) => {
@@ -72,6 +80,9 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
         fontFamily: 'Arial, Helvetica, sans-serif',
         fontSize: '10px',
         lineHeight: 1.3,
+        // Prevents sub-pixel gaps opening up between stacked tables/divs
+        // during export — a common cause of hairline "double border" ghosts.
+        transform: 'translateZ(0)',
       }}
     >
       <div className="text-center font-bold border border-black border-b-0 py-1" style={{ fontSize: '13px' }}>
@@ -161,15 +172,15 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
       <table className="w-full flex-1" style={{ borderCollapse: 'collapse', tableLayout: 'fixed' }}>
         <thead>
           <tr>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '26px' }}>Sl<br/>No</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '58px' }}>Item Code</th>
-            <th className={CELL + ' font-bold'}>Description of Goods</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '52px' }}>HSN/SAC</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '52px' }}>Quantity</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '56px' }}>Rate</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '32px' }}>per</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '40px' }}>Disc %</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '72px' }}>Amount</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '26px' }}>Sl<br/>No</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '58px' }}>Item Code</th>
+            <th className={CELL_NT + ' font-bold'}>Description of Goods</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '52px' }}>HSN/SAC</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '52px' }}>Quantity</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '56px' }}>Rate</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '32px' }}>per</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '40px' }}>Disc %</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '72px' }}>Amount</th>
           </tr>
         </thead>
         <tbody>
@@ -235,7 +246,7 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
       <table className="w-full" style={{ borderCollapse: 'collapse' }}>
         <tbody>
           <tr>
-            <td className={CELL}>
+            <td className={CELL_NT}>
               <span className={LBL}>Amount Chargeable (in words)</span>
               <div className="font-semibold mt-0.5">INR {numberToWords(grandTotal)}</div>
             </td>
@@ -247,10 +258,10 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
       <table className="w-full" style={{ borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            <th className={CELL} rowSpan={2} style={{ width: '20%' }}>Taxable Value</th>
-            <th className={CELL} colSpan={2}>Central Tax</th>
-            <th className={CELL} colSpan={2}>State Tax</th>
-            <th className={CELL} rowSpan={2} style={{ width: '18%' }}>Total Tax Amount</th>
+            <th className={CELL_NT} rowSpan={2} style={{ width: '20%' }}>Taxable Value</th>
+            <th className={CELL_NT} colSpan={2}>Central Tax</th>
+            <th className={CELL_NT} colSpan={2}>State Tax</th>
+            <th className={CELL_NT} rowSpan={2} style={{ width: '18%' }}>Total Tax Amount</th>
           </tr>
           <tr>
             <th className={CELL} style={{ width: '10%' }}>Rate</th>
@@ -280,7 +291,7 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
       <table className="w-full" style={{ borderCollapse: 'collapse' }}>
         <tbody>
           <tr>
-            <td className={CELL}>
+            <td className={CELL_NT}>
               <span className={LBL}>Tax Amount (in words)</span>{' '}
               <span className="font-semibold">INR {numberToWords(totalCgst + totalSgst + totalIgst)}</span>
             </td>
@@ -292,7 +303,7 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
       <table className="w-full" style={{ borderCollapse: 'collapse' }}>
         <tbody>
           <tr>
-            <td className={CELL} style={{ width: '55%' }}>
+            <td className={CELL_NT} style={{ width: '55%' }}>
               <div><span className={LBL}>Company's PAN</span> &nbsp; {data.companyPan}</div>
               <div className="mt-1 font-semibold">Declaration</div>
               <div style={{ fontSize: '8.5px' }} className="leading-relaxed">
@@ -309,7 +320,7 @@ the truthful, and the martyrs."
                 {data.specialNotes && (<><br /><b>Note:</b> {data.specialNotes}</>)}
               </div>
             </td>
-            <td className={CELL}>
+            <td className={CELL_NT}>
               <div className="flex justify-between items-start gap-2">
                 <div>
                  <div>
