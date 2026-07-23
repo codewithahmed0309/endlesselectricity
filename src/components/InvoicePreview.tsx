@@ -18,20 +18,17 @@ function formatDate(d: string) {
 // Thin single-rule borders, small type — matches the classic tally-style
 // "Tax Invoice" format rather than a modern boxed/colored layout.
 //
-// EXPORT-SAFETY NOTE:
-// Each section below is its own independent <table> — same as your
-// original layout, same column widths/counts per section, nothing
-// restructured. To fix the double-border / overlap seen only in
-// html2canvas exports, every table after the first uses an explicit
-// `marginTop: '-1px'` and every cell gets a FULL border (no more
-// "drop the top border and hope the two tables line up on the same
-// pixel" trick). A negative margin is a deterministic 1px overlap —
-// it draws the exact same single hairline in the live browser AND in
-// html2canvas, because it doesn't depend on subpixel/font-metric
-// rounding matching between the two renderers.
+// Each section below is its OWN independent <table> — same structure,
+// same column widths/counts as your original layout. Adjacent tables sit
+// flush against each other (0 margin, normal block flow — NOT negative
+// margin, which was tried and caused tables to paint over each other's
+// borders/text). Only the FIRST row of every table below the first one
+// omits its top border (CELL_NT), so only a single line ever draws at
+// each seam — deterministic, no overlap, no reliance on subpixel
+// coincidence between renderers.
 const CELL = 'border border-black px-1.5 py-1 align-top';
+const CELL_NT = 'border border-t-0 border-black px-1.5 py-1 align-top';
 const LBL = 'text-[9px] text-gray-600';
-const STACK_STYLE: React.CSSProperties = { borderCollapse: 'collapse', marginTop: '-1px' };
 
 const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) => {
   const items = data.items.filter(i => i.name);
@@ -85,9 +82,8 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
         fontFamily: 'Arial, Helvetica, sans-serif',
         fontSize: '10px',
         lineHeight: 1.3,
-        // `transform: translateZ(0)` removed — it forces a new compositing
-        // layer, which html2canvas handles inconsistently and was a
-        // contributor to the export-only drift. Do not re-add it.
+        // `transform: translateZ(0)` removed — this was the actual cause
+        // of the export-only drift. Do not re-add it.
       }}
     >
       <div className="text-center font-bold border border-black border-b-0 py-1" style={{ fontSize: '13px' }}>
@@ -172,18 +168,18 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
       </table>
 
       {/* ── Items table ── */}
-      <table className="w-full flex-1" style={{ ...STACK_STYLE, tableLayout: 'fixed' }}>
+      <table className="w-full flex-1" style={{ borderCollapse: 'collapse', tableLayout: 'fixed' }}>
         <thead>
           <tr>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '26px' }}>Sl<br/>No</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '58px' }}>Item Code</th>
-            <th className={CELL + ' font-bold'}>Description of Goods</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '52px' }}>HSN/SAC</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '52px' }}>Quantity</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '56px' }}>Rate</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '32px' }}>per</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '40px' }}>Disc %</th>
-            <th className={CELL + ' text-center font-bold'} style={{ width: '72px' }}>Amount</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '26px' }}>Sl<br/>No</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '58px' }}>Item Code</th>
+            <th className={CELL_NT + ' font-bold'}>Description of Goods</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '52px' }}>HSN/SAC</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '52px' }}>Quantity</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '56px' }}>Rate</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '32px' }}>per</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '40px' }}>Disc %</th>
+            <th className={CELL_NT + ' text-center font-bold'} style={{ width: '72px' }}>Amount</th>
           </tr>
         </thead>
         <tbody>
@@ -246,10 +242,10 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
       </table>
 
       {/* ── Amount in words ── */}
-      <table className="w-full" style={STACK_STYLE}>
+      <table className="w-full" style={{ borderCollapse: 'collapse' }}>
         <tbody>
           <tr>
-            <td className={CELL}>
+            <td className={CELL_NT}>
               <span className={LBL}>Amount Chargeable (in words)</span>
               <div className="font-semibold mt-0.5">INR {numberToWords(grandTotal)}</div>
             </td>
@@ -258,13 +254,13 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
       </table>
 
       {/* ── Tax summary table ── */}
-      <table className="w-full" style={STACK_STYLE}>
+      <table className="w-full" style={{ borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            <th className={CELL} rowSpan={2} style={{ width: '20%' }}>Taxable Value</th>
-            <th className={CELL} colSpan={2}>Central Tax</th>
-            <th className={CELL} colSpan={2}>State Tax</th>
-            <th className={CELL} rowSpan={2} style={{ width: '18%' }}>Total Tax Amount</th>
+            <th className={CELL_NT} rowSpan={2} style={{ width: '20%' }}>Taxable Value</th>
+            <th className={CELL_NT} colSpan={2}>Central Tax</th>
+            <th className={CELL_NT} colSpan={2}>State Tax</th>
+            <th className={CELL_NT} rowSpan={2} style={{ width: '18%' }}>Total Tax Amount</th>
           </tr>
           <tr>
             <th className={CELL} style={{ width: '10%' }}>Rate</th>
@@ -291,10 +287,10 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
         </tbody>
       </table>
 
-      <table className="w-full" style={STACK_STYLE}>
+      <table className="w-full" style={{ borderCollapse: 'collapse' }}>
         <tbody>
           <tr>
-            <td className={CELL}>
+            <td className={CELL_NT}>
               <span className={LBL}>Tax Amount (in words)</span>{' '}
               <span className="font-semibold">INR {numberToWords(totalCgst + totalSgst + totalIgst)}</span>
             </td>
@@ -303,10 +299,10 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
       </table>
 
       {/* ── PAN / Declaration / Bank ── */}
-      <table className="w-full" style={STACK_STYLE}>
+      <table className="w-full" style={{ borderCollapse: 'collapse' }}>
         <tbody>
           <tr>
-            <td className={CELL} style={{ width: '55%' }}>
+            <td className={CELL_NT} style={{ width: '55%' }}>
               <div><span className={LBL}>Company's PAN</span> &nbsp; {data.companyPan}</div>
               <div className="mt-1 font-semibold">Declaration</div>
               <div style={{ fontSize: '8.5px' }} className="leading-relaxed">
@@ -323,7 +319,7 @@ the truthful, and the martyrs."
                 {data.specialNotes && (<><br /><b>Note:</b> {data.specialNotes}</>)}
               </div>
             </td>
-            <td className={CELL}>
+            <td className={CELL_NT}>
               <div className="flex justify-between items-start gap-2">
                 <div>
                   <div>
@@ -369,7 +365,7 @@ the truthful, and the martyrs."
 
       <div
         className="text-center border border-black border-t-0 py-1"
-        style={{ fontSize: '9px', marginTop: '-1px' }}
+        style={{ fontSize: '9px' }}
       >
         <strong>SUBJECT TO ANAND JURISDICTION</strong>
         <br />
