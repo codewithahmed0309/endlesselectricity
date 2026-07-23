@@ -18,26 +18,20 @@ function formatDate(d: string) {
 // Thin single-rule borders, small type — matches the classic tally-style
 // "Tax Invoice" format rather than a modern boxed/colored layout.
 //
-// IMPORTANT (export-safety note):
-// Every section that used to be its own separate <table> stacked on top of
-// the next one has been merged into ONE continuous <table> with multiple
-// <tbody> groups below. That's the actual fix for the doubled/overlapping
-// borders and the "Amount Chargeable" text colliding with the tax summary
-// table in exported PDFs/images.
-//
-// Why: two adjacent SEPARATE tables each draw their own border-collapse
-// independently. The browser happens to subpixel-snap them onto the same
-// line, so it looks fine on screen. html2canvas / dom-to-image compute
-// row heights and font metrics slightly differently than the live DOM
-// layout engine, so that "coincidental" alignment breaks — borders drift
-// apart or overlap, and box heights (esp. text-wrapping cells) come out a
-// fraction of a pixel taller/shorter, which cascades into visible overlap
-// on the next section. A single continuous table has ONE border-collapse
-// context, so every seam is drawn exactly once by construction — nothing
-// to misalign, in the browser OR any rasterizer.
+// EXPORT-SAFETY NOTE:
+// Each section below is its own independent <table> — same as your
+// original layout, same column widths/counts per section, nothing
+// restructured. To fix the double-border / overlap seen only in
+// html2canvas exports, every table after the first uses an explicit
+// `marginTop: '-1px'` and every cell gets a FULL border (no more
+// "drop the top border and hope the two tables line up on the same
+// pixel" trick). A negative margin is a deterministic 1px overlap —
+// it draws the exact same single hairline in the live browser AND in
+// html2canvas, because it doesn't depend on subpixel/font-metric
+// rounding matching between the two renderers.
 const CELL = 'border border-black px-1.5 py-1 align-top';
-const CELL_HEAD = 'border border-black px-1.5 py-1 align-top font-bold text-center';
 const LBL = 'text-[9px] text-gray-600';
+const STACK_STYLE: React.CSSProperties = { borderCollapse: 'collapse', marginTop: '-1px' };
 
 const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) => {
   const items = data.items.filter(i => i.name);
@@ -91,28 +85,20 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
         fontFamily: 'Arial, Helvetica, sans-serif',
         fontSize: '10px',
         lineHeight: 1.3,
-        // NOTE: `transform: translateZ(0)` was removed. It forces a new
-        // compositing layer, which html2canvas/dom-to-image handle
-        // inconsistently and was contributing to the layout drift seen
-        // only in exports. Do not re-add it.
+        // `transform: translateZ(0)` removed — it forces a new compositing
+        // layer, which html2canvas handles inconsistently and was a
+        // contributor to the export-only drift. Do not re-add it.
       }}
     >
       <div className="text-center font-bold border border-black border-b-0 py-1" style={{ fontSize: '13px' }}>
         TAX INVOICE
       </div>
 
-      {/*
-        ── SINGLE continuous table for the whole invoice body ──
-        Multiple <tbody> groups below replace what used to be separate
-        <table> elements. border-collapse now applies across the entire
-        document, so every horizontal seam is drawn exactly once.
-      */}
-      <table className="w-full flex-1" style={{ borderCollapse: 'collapse', tableLayout: 'fixed' }}>
-
-        {/* ── Company header + invoice meta ── */}
+      {/* ── Company header + invoice meta ── */}
+      <table className="w-full" style={{ borderCollapse: 'collapse' }}>
         <tbody>
           <tr>
-            <td className={CELL} style={{ width: '58%' }} rowSpan={5}>
+            <td className={CELL} style={{ width: '58%' }} rowSpan={4}>
               <div className="flex items-start gap-2">
                 {data.logoUrl && (
                   <img src={data.logoUrl} alt="logo" style={{ width: '34px', height: '34px' }} className="object-contain flex-shrink-0" />
@@ -122,82 +108,85 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
                     ENDLESS ELECTRICAL
                   </div>
 
-                  <div className="mt-0.5" style={{ lineHeight: '1.4' }}>
+                  <div className="mt-0.5">
                     G/F 0.7,K-10,ARCADE,100ft ROAD,OPP DIYA CINEMA ANAND
                   </div>
 
-                  <div style={{ lineHeight: '1.4' }}>
+                  <div>
                     GUJARAT - 388001
                   </div>
 
-                  <div style={{ lineHeight: '1.4' }}>
+                  <div>
                     GSTIN/UIN: 24AFQPV8836E1ZU
                   </div>
 
-                  <div style={{ lineHeight: '1.4' }}>
+                  <div>
                     Contact: +91 9825338373
                   </div>
 
-                  <div style={{ lineHeight: '1.4' }}>
+                  <div>
                     E-Mail: endless98253@gmail.com
                   </div>
 
                   <div className="mt-2">
                     <div className={LBL}>Consignee (Ship to)</div>
                     <div className="font-semibold">{consigneeName}</div>
-                    <div style={{ lineHeight: '1.4' }}>{consigneeAddress}</div>
-                    <div style={{ lineHeight: '1.4' }}>GSTIN/UIN: {consigneeGstin}</div>
-                    <div style={{ lineHeight: '1.4' }}>State Name: {consigneeState}</div>
+                    <div>{consigneeAddress}</div>
+                    <div>GSTIN/UIN: {consigneeGstin}</div>
+                    <div>State Name: {consigneeState}</div>
                   </div>
 
                   <div className="mt-2">
                     <div className={LBL}>Buyer (Bill to)</div>
                     <div className="font-semibold">{data.customerName}</div>
-                    <div style={{ lineHeight: '1.4' }}>{data.customerAddress}</div>
-                    <div style={{ lineHeight: '1.4' }}>GSTIN/UIN: {data.customerGstin}</div>
-                    <div style={{ lineHeight: '1.4' }}>State Name: {data.customerStateName}</div>
-                    <div style={{ lineHeight: '1.4' }}>Place of Supply: {data.customerStateName}</div>
+                    <div>{data.customerAddress}</div>
+                    <div>GSTIN/UIN: {data.customerGstin}</div>
+                    <div>State Name: {data.customerStateName}</div>
+                    <div>Place of Supply: {data.customerStateName}</div>
                   </div>
                 </div>
               </div>
             </td>
-            <td className={CELL} colSpan={4}><span className={LBL}>Invoice No.</span><br />{data.invoiceNumber}</td>
-            <td className={CELL} colSpan={4}><span className={LBL}>Dated</span><br />{formatDate(data.invoiceDate)}</td>
+            <td className={CELL}><span className={LBL}>Invoice No.</span><br />{data.invoiceNumber}</td>
+            <td className={CELL}><span className={LBL}>Dated</span><br />{formatDate(data.invoiceDate)}</td>
           </tr>
           <tr>
-            <td className={CELL} colSpan={4}><span className={LBL}>Delivery Note</span><br />&nbsp;</td>
-            <td className={CELL} colSpan={4}><span className={LBL}>Mode/Terms of Payment</span><br />{data.paymentTerms}</td>
+            <td className={CELL}><span className={LBL}>Delivery Note</span><br />&nbsp;</td>
+            <td className={CELL}><span className={LBL}>Mode/Terms of Payment</span><br />{data.paymentTerms}</td>
           </tr>
           <tr>
-            <td className={CELL} colSpan={4}><span className={LBL}>Buyer's Order No.</span><br />{data.poNumber}</td>
-            <td className={CELL} colSpan={4}><span className={LBL}>Dated</span><br />{formatDate(data.orderDate)}</td>
+            <td className={CELL}><span className={LBL}>Buyer's Order No.</span><br />{data.poNumber}</td>
+            <td className={CELL}><span className={LBL}>Dated</span><br />{formatDate(data.orderDate)}</td>
           </tr>
           <tr>
-            <td className={CELL} colSpan={4}><span className={LBL}>Dispatched through</span><br />{data.transporterName}</td>
-            <td className={CELL} colSpan={4}><span className={LBL}>Destination</span><br />{data.toLocation}</td>
+            <td className={CELL}><span className={LBL}>Dispatched through</span><br />{data.transporterName}</td>
+            <td className={CELL}><span className={LBL}>Destination</span><br />{data.toLocation}</td>
           </tr>
           <tr>
-            <td className={CELL} colSpan={8}>
+            <td className={CELL} colSpan={2}>
               <span className={LBL}>Terms of Delivery</span><br />
               {[data.fromLocation && `From: ${data.fromLocation}`, data.vehicleNumber && `Vehicle: ${data.vehicleNumber}`].filter(Boolean).join('  |  ')}
             </td>
           </tr>
         </tbody>
+      </table>
 
-        {/* ── Items table ── */}
-        <tbody>
+      {/* ── Items table ── */}
+      <table className="w-full flex-1" style={{ ...STACK_STYLE, tableLayout: 'fixed' }}>
+        <thead>
           <tr>
-            <td className={CELL_HEAD} style={{ width: '26px' }}>Sl<br/>No</td>
-            <td className={CELL_HEAD} style={{ width: '58px' }}>Item Code</td>
-            <td className={CELL + ' font-bold'} style={{ width: '32%' }}>Description of Goods</td>
-            <td className={CELL_HEAD} style={{ width: '52px' }}>HSN/SAC</td>
-            <td className={CELL_HEAD} style={{ width: '52px' }}>Quantity</td>
-            <td className={CELL_HEAD} style={{ width: '56px' }}>Rate</td>
-            <td className={CELL_HEAD} style={{ width: '32px' }}>per</td>
-            <td className={CELL_HEAD} style={{ width: '40px' }}>Disc %</td>
-            <td className={CELL_HEAD} style={{ width: '72px' }}>Amount</td>
+            <th className={CELL + ' text-center font-bold'} style={{ width: '26px' }}>Sl<br/>No</th>
+            <th className={CELL + ' text-center font-bold'} style={{ width: '58px' }}>Item Code</th>
+            <th className={CELL + ' font-bold'}>Description of Goods</th>
+            <th className={CELL + ' text-center font-bold'} style={{ width: '52px' }}>HSN/SAC</th>
+            <th className={CELL + ' text-center font-bold'} style={{ width: '52px' }}>Quantity</th>
+            <th className={CELL + ' text-center font-bold'} style={{ width: '56px' }}>Rate</th>
+            <th className={CELL + ' text-center font-bold'} style={{ width: '32px' }}>per</th>
+            <th className={CELL + ' text-center font-bold'} style={{ width: '40px' }}>Disc %</th>
+            <th className={CELL + ' text-center font-bold'} style={{ width: '72px' }}>Amount</th>
           </tr>
-
+        </thead>
+        <tbody>
           {rows.map((r, idx) => (
             <tr key={r.id}>
               <td className={CELL + ' text-center'}>{idx + 1}</td>
@@ -242,7 +231,8 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
               <td className={CELL + ' text-right'}>{fmt(totalIgst)}</td>
             </tr>
           )}
-
+        </tbody>
+        <tfoot>
           <tr className="font-bold">
             <td className={CELL}></td>
             <td className={CELL}></td>
@@ -252,85 +242,100 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
             <td className={CELL} colSpan={3}></td>
             <td className={CELL + ' text-right'}>&#8377; {fmt(grandTotal)}</td>
           </tr>
-        </tbody>
+        </tfoot>
+      </table>
 
-        {/* ── Amount in words ── */}
+      {/* ── Amount in words ── */}
+      <table className="w-full" style={STACK_STYLE}>
         <tbody>
           <tr>
-            <td className={CELL} colSpan={9}>
+            <td className={CELL}>
               <span className={LBL}>Amount Chargeable (in words)</span>
               <div className="font-semibold mt-0.5">INR {numberToWords(grandTotal)}</div>
             </td>
           </tr>
         </tbody>
+      </table>
 
-        {/* ── Tax summary table ── */}
+      {/* ── Tax summary table ── */}
+      <table className="w-full" style={STACK_STYLE}>
+        <thead>
+          <tr>
+            <th className={CELL} rowSpan={2} style={{ width: '20%' }}>Taxable Value</th>
+            <th className={CELL} colSpan={2}>Central Tax</th>
+            <th className={CELL} colSpan={2}>State Tax</th>
+            <th className={CELL} rowSpan={2} style={{ width: '18%' }}>Total Tax Amount</th>
+          </tr>
+          <tr>
+            <th className={CELL} style={{ width: '10%' }}>Rate</th>
+            <th className={CELL} style={{ width: '16%' }}>Amount</th>
+            <th className={CELL} style={{ width: '10%' }}>Rate</th>
+            <th className={CELL} style={{ width: '16%' }}>Amount</th>
+          </tr>
+        </thead>
         <tbody>
           <tr>
-            <td className={CELL_HEAD} rowSpan={2} colSpan={2}>Taxable Value</td>
-            <td className={CELL_HEAD} colSpan={2}>Central Tax</td>
-            <td className={CELL_HEAD} colSpan={2}>State Tax</td>
-            <td className={CELL_HEAD} rowSpan={2} colSpan={3}>Total Tax Amount</td>
-          </tr>
-          <tr>
-            <td className={CELL_HEAD}>Rate</td>
-            <td className={CELL_HEAD}>Amount</td>
-            <td className={CELL_HEAD}>Rate</td>
-            <td className={CELL_HEAD}>Amount</td>
-          </tr>
-          <tr>
-            <td className={CELL + ' text-right'} colSpan={2}>{fmt(totalTaxable)}</td>
+            <td className={CELL + ' text-right'}>{fmt(totalTaxable)}</td>
             <td className={CELL + ' text-center'}>{cgstRatePct}%</td>
             <td className={CELL + ' text-right'}>{fmt(totalCgst)}</td>
             <td className={CELL + ' text-center'}>{sgstRatePct}%</td>
             <td className={CELL + ' text-right'}>{fmt(totalSgst)}</td>
-            <td className={CELL + ' text-right'} colSpan={3}>{fmt(totalCgst + totalSgst + totalIgst)}</td>
+            <td className={CELL + ' text-right'}>{fmt(totalCgst + totalSgst + totalIgst)}</td>
           </tr>
           <tr className="font-bold">
-            <td className={CELL + ' text-right'} colSpan={2}>{fmt(totalTaxable)}</td>
+            <td className={CELL + ' text-right'}>{fmt(totalTaxable)}</td>
             <td className={CELL} colSpan={2}></td>
             <td className={CELL} colSpan={2}></td>
-            <td className={CELL + ' text-right'} colSpan={3}>{fmt(totalCgst + totalSgst + totalIgst)}</td>
+            <td className={CELL + ' text-right'}>{fmt(totalCgst + totalSgst + totalIgst)}</td>
           </tr>
         </tbody>
+      </table>
 
-        {/* ── Tax amount in words ── */}
+      <table className="w-full" style={STACK_STYLE}>
         <tbody>
           <tr>
-            <td className={CELL} colSpan={9}>
+            <td className={CELL}>
               <span className={LBL}>Tax Amount (in words)</span>{' '}
               <span className="font-semibold">INR {numberToWords(totalCgst + totalSgst + totalIgst)}</span>
             </td>
           </tr>
         </tbody>
+      </table>
 
-        {/* ── PAN / Declaration / Bank ── */}
+      {/* ── PAN / Declaration / Bank ── */}
+      <table className="w-full" style={STACK_STYLE}>
         <tbody>
           <tr>
-            <td className={CELL} style={{ width: '55%' }} colSpan={5}>
+            <td className={CELL} style={{ width: '55%' }}>
               <div><span className={LBL}>Company's PAN</span> &nbsp; {data.companyPan}</div>
               <div className="mt-1 font-semibold">Declaration</div>
-              <div style={{ fontSize: '8.5px', lineHeight: '1.4' }}>
-                "We conduct our business in accordance with the teachings of Islam,
-                striving for honesty, fairness, and trust in every transaction."
-                <br /><br />
-                "Give full measure and weight with justice."
-                — Surah Hud (11:85)
-                <br /><br />
-                "The truthful and trustworthy merchant will be with the Prophets,
-                the truthful, and the martyrs."
-                — Jami' at-Tirmidhi 1209
+              <div style={{ fontSize: '8.5px' }} className="leading-relaxed">
+
+"We conduct our business in accordance with the teachings of Islam,
+striving for honesty, fairness, and trust in every transaction."
+<br /><br />
+"Give full measure and weight with justice."
+— Surah Hud (11:85)
+<br /><br />
+"The truthful and trustworthy merchant will be with the Prophets,
+the truthful, and the martyrs."
+— Jami' at-Tirmidhi 1209
                 {data.specialNotes && (<><br /><b>Note:</b> {data.specialNotes}</>)}
               </div>
             </td>
-            <td className={CELL} colSpan={4}>
+            <td className={CELL}>
               <div className="flex justify-between items-start gap-2">
                 <div>
-                  <div className="font-semibold">Company's Bank Details</div>
-                  <div style={{ lineHeight: '1.4' }}>Bank Name: BANK OF BARODA</div>
-                  <div style={{ lineHeight: '1.4' }}>A/c No.: 40510200000210</div>
-                  <div style={{ lineHeight: '1.4' }}>IFSC Code: BARB0BAKROL</div>
-                  <div style={{ lineHeight: '1.4' }}>UPI ID: endlesselectrical@oksbi</div>
+                  <div>
+                    <div className="font-semibold">Company's Bank Details</div>
+
+                    <div>Bank Name:BANK OF BARODA</div>
+
+                    <div>A/c No.: 40510200000210</div>
+                    <div>IFSC Code: BARB0BAKROL</div>
+
+                    <div>UPI ID: endlesselectrical@oksbi</div>
+                  </div>
                 </div>
 
                 <div className="flex-shrink-0 text-center" style={{ fontSize: '7.5px' }}>
@@ -364,7 +369,7 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
 
       <div
         className="text-center border border-black border-t-0 py-1"
-        style={{ fontSize: '9px' }}
+        style={{ fontSize: '9px', marginTop: '-1px' }}
       >
         <strong>SUBJECT TO ANAND JURISDICTION</strong>
         <br />
