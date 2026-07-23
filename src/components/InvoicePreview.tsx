@@ -322,6 +322,8 @@ the truthful, and the martyrs."
 
   <div>UPI ID: endlesselectrical@oksbi</div>
 </div>
+                </div>        
+                  
                 <div className="flex-shrink-0 text-center" style={{ fontSize: '7.5px' }}>
                   <div
                     className="border border-black flex items-center justify-center bg-white"
