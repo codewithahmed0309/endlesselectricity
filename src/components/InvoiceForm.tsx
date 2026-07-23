@@ -24,7 +24,6 @@ function newItem(): InvoiceItem {
     cgstRate: 9,
     sgstRate: 9,
     igstRate: 0,
-    isNoReturn: false,
   };
 }
 
@@ -346,11 +345,6 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-semibold text-gray-500">Item #{idx + 1}</span>
-                  {item.isNoReturn && (
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600 border border-red-200">
-                      NO RETURN
-                    </span>
-                  )}
                 </div>
                 <button
                   onClick={() => removeItem(item.id)}
@@ -511,15 +505,6 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
                   />
                 </div>
               </div>
-              <label className="mt-2 flex items-center gap-1.5 cursor-pointer w-fit">
-                <input
-                  type="checkbox"
-                  className="h-3.5 w-3.5 accent-red-600 cursor-pointer"
-                  checked={!!item.isNoReturn}
-                  onChange={e => updateItem(item.id, { isNoReturn: e.target.checked })}
-                />
-                <span className="text-xs font-medium text-red-600">Mark as No Return item</span>
-              </label>
             </div>
           ))}
         </div>
