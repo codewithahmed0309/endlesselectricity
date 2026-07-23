@@ -323,7 +323,16 @@ export default function App() {
   const captureCanvas = async (): Promise<HTMLCanvasElement | null> => {
     const el = previewRef.current;
     if (!el) return null;
-    return html2canvas(el, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false });
+    return html2canvas(el, {
+      scale: 3,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      letterRendering: true,
+      windowWidth: el.scrollWidth,
+      windowHeight: el.scrollHeight,
+    });
   };
 
   // ── PDF generation (standard A4 page) ────────────────────────────────────────
@@ -341,10 +350,14 @@ export default function App() {
       const contentH = pdfH - (margin * 2);
 
       // Calculate image dimensions to fit width
+      // CAPTURE_SCALE must match the `scale` passed to html2canvas in
+      // captureCanvas() above — it's how many device pixels the canvas
+      // has per CSS pixel. Keep these two in sync if you ever change one.
+      const CAPTURE_SCALE = 3;
       const imgW = canvas.width;
       const imgH = canvas.height;
-      const scaleX = contentW / (imgW / 2); // divide by 2 because canvas is 2x scale
-      const scaledH = (imgH / 2) * scaleX;
+      const scaleX = contentW / (imgW / CAPTURE_SCALE);
+      const scaledH = (imgH / CAPTURE_SCALE) * scaleX;
 
       // If scaled height fits in one page, use it
       if (scaledH <= contentH) {
