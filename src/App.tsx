@@ -17,27 +17,65 @@ const today = () => new Date().toISOString().split('T')[0];
 
 function defaultData(): InvoiceData {
   return {
+    // Company
     logoUrl: '',
     companyName: 'Endless Electrical',
     companyAddress: 'Shop No. 1, Main Market Road',
     companyCity: 'Your City, STATE, 000000',
     companyMobile: '+91 00000 00000',
+    companyEmail: '',
+    companyGstin: '',
+    companyPan: '',
+
+    // Invoice meta
     invoiceNumber: peekInvoiceNumber(),
     invoiceDate: today(),
     dueDate: today(),
+    poNumber: '',
+    orderDate: today(),
+    paymentTerms: '',
+    transporterName: '',
+    vehicleNumber: '',
+    fromLocation: '',
+    toLocation: '',
+
+    // Receiver (Bill to)
     customerName: '',
     customerPhone: '',
+    customerAddress: '',
+    customerGstin: '',
+    customerStateName: '',
+    customerContactPerson: '',
+    customerContactNumber: '',
+
+    // Consignee (Ship to)
+    sameAsReceiver: true,
+    consigneeName: '',
+    consigneeAddress: '',
+    consigneeGstin: '',
+    consigneeStateName: '',
+    consigneeContactPerson: '',
+    consigneeContactNumber: '',
+
+    // Dispatch
     dispatchName: 'Endless Electrical',
     dispatchAddress: 'Shop No. 1, Main Market Road',
     dispatchCity: 'Your City',
     dispatchState: 'STATE',
     dispatchPincode: '000000',
     reference: '',
+
+    // Items
     items: [{
       id: crypto.randomUUID(),
+      itemCode: '',
       name: '', hsnSac: '', rate: 0, originalRate: 0,
       qty: 1, unit: 'UNT', discount: 0, amount: 0,
+      cgstRate: 9, sgstRate: 9, igstRate: 0,
+      isNoReturn: false,
     }],
+
+    // Bank
     bankDetails: {
       bankName: 'ICICI Bank',
       accountNumber: '642201002623',
@@ -45,8 +83,13 @@ function defaultData(): InvoiceData {
       branch: 'MAHAD',
       upiId: '',
     },
+
+    // Signature
     signatureUrl: '',
+
+    // Notes
     notes: 'Thank you for choosing Endless Electrical!\n\nGoods once sold will not be taken back or exchanged. Please check the material before leaving the store.',
+    specialNotes: '',
   };
 }
 
@@ -57,27 +100,16 @@ export default function App() {
   const [data, setData]     = useState<InvoiceData>(() => {
     const saved = loadInvoice();
     if (!saved) return defaultData();
+    // Merge onto full defaults so any fields missing from an older saved
+    // record (schema drift) fall back to sane defaults instead of undefined.
     const def = defaultData();
     return {
+      ...def,
       ...saved,
-      logoUrl:         saved.logoUrl         || def.logoUrl,
-      companyName:     saved.companyName     || def.companyName,
-      companyAddress:  saved.companyAddress  || def.companyAddress,
-      companyCity:     saved.companyCity     || def.companyCity,
-      companyMobile:   saved.companyMobile   || def.companyMobile,
-      dispatchName:    saved.dispatchName    || def.dispatchName,
-      dispatchAddress: saved.dispatchAddress || def.dispatchAddress,
-      dispatchCity:    saved.dispatchCity    || def.dispatchCity,
-      dispatchState:   saved.dispatchState   || def.dispatchState,
-      dispatchPincode: saved.dispatchPincode || def.dispatchPincode,
-      notes:           saved.notes           || def.notes,
-      bankDetails: {
-        bankName:      saved.bankDetails?.bankName      || def.bankDetails.bankName,
-        accountNumber: saved.bankDetails?.accountNumber || def.bankDetails.accountNumber,
-        ifscCode:      saved.bankDetails?.ifscCode      || def.bankDetails.ifscCode,
-        branch:        saved.bankDetails?.branch        || def.bankDetails.branch,
-        upiId:         saved.bankDetails?.upiId         || def.bankDetails.upiId,
-      },
+      items: saved.items?.length
+        ? saved.items.map(i => ({ ...def.items[0], ...i, id: i.id || crypto.randomUUID() }))
+        : def.items,
+      bankDetails: { ...def.bankDetails, ...saved.bankDetails },
     };
   });
   const [showPreview, setShowPreview] = useState(true);

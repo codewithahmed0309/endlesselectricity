@@ -12,6 +12,7 @@ export interface InvoiceItem {
   cgstRate: number;
   sgstRate: number;
   igstRate: number;
+  isNoReturn: boolean;
 }
 
 export interface BankDetails {

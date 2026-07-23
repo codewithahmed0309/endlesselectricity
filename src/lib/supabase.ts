@@ -45,12 +45,14 @@ export interface DbProduct {
   name: string;
    company: string | null;
   hsn_sac: string;
+  item_code: string | null;
   rate: number;
   original_rate: number;
   unit: string;
   stock_qty: number;
   description: string | null;
   category: string | null;
+  is_no_return: boolean;
   created_at: string;
 }
 

@@ -24,7 +24,7 @@ const SEED_CATEGORIES = [
 type FormState = Omit<DbProduct, 'id' | 'created_at'>;
 
 const emptyForm = (): FormState => ({
-  name: '', company: '', hsn_sac: '', rate: 0, original_rate: 0, unit: 'UNT', stock_qty: 0, description: '', category: '',
+  name: '', company: '', hsn_sac: '', item_code: '', rate: 0, original_rate: 0, unit: 'UNT', stock_qty: 0, description: '', category: '', is_no_return: false,
 });
 
 export default function Inventory() {
@@ -155,12 +155,14 @@ export default function Inventory() {
       name: p.name,
       company: p.company ?? '',
       hsn_sac: p.hsn_sac,
+      item_code: p.item_code ?? '',
       rate: p.rate,
       original_rate: p.original_rate,
       unit: p.unit,
       stock_qty: p.stock_qty,
       description: p.description ?? '',
       category: p.category ?? '',
+      is_no_return: p.is_no_return ?? false,
     });
     setUseCustomCategory(!!p.category && !categoryNames.includes(p.category));
     setUseCustomCompany(!!p.company && !companyNames.includes(p.company));
@@ -680,14 +682,29 @@ export default function Inventory() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
+                  <label className={lbl}>Item Code</label>
+                  <input
+                    className={inp}
+                    value={form.item_code || ''}
+                    onChange={e => f('item_code', e.target.value)}
+                    placeholder="e.g. EX-1001"
+                  />
+                </div>
+                <div>
                   <label className={lbl}>HSN / SAC</label>
                   <input className={inp} value={form.hsn_sac} onChange={e => f('hsn_sac', e.target.value)} />
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className={lbl}>Unit</label>
                   <select className={inp} value={form.unit} onChange={e => f('unit', e.target.value)}>
                     {UNITS.map(u => <option key={u}>{u}</option>)}
                   </select>
+                </div>
+                <div>
+                  <label className={lbl}>Stock Quantity</label>
+                  <input type="number" min="0" className={inp} value={form.stock_qty || ''} onChange={e => f('stock_qty', Number(e.target.value))} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -700,9 +717,22 @@ export default function Inventory() {
                   <input type="number" min="0" className={inp} value={form.original_rate || ''} onChange={e => f('original_rate', Number(e.target.value))} />
                 </div>
               </div>
-              <div>
-                <label className={lbl}>Stock Quantity</label>
-                <input type="number" min="0" className={inp} value={form.stock_qty || ''} onChange={e => f('stock_qty', Number(e.target.value))} />
+              <div className="flex items-start gap-2 bg-red-50 border border-red-100 rounded-lg px-3 py-2.5">
+                <input
+                  id="is_no_return"
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 accent-red-600 cursor-pointer"
+                  checked={!!form.is_no_return}
+                  onChange={e => f('is_no_return', e.target.checked)}
+                />
+                <label htmlFor="is_no_return" className="cursor-pointer">
+                  <div className="text-sm font-semibold text-red-700">No Return Product</div>
+                  <div className="text-xs text-red-500 mt-0.5">
+                    Mark this if the item cannot be returned once sold (e.g. cut cable, custom order). It will show a
+                    "No Return" tag on the bill. Leave unchecked for normal items — those are returnable within 3–4 days
+                    if the seal is unopened.
+                  </div>
+                </label>
               </div>
               <div>
                 <label className={lbl}>Description</label>
@@ -739,6 +769,7 @@ export default function Inventory() {
               <thead>
                 <tr className="text-xs text-gray-500 uppercase tracking-wide border-b border-gray-100">
                   <th className="text-left px-5 py-3">Product</th>
+                  <th className="text-left px-5 py-3">Item Code</th>
                   <th className="text-left px-5 py-3">Category</th>
                   <th className="text-left px-5 py-3">HSN/SAC</th>
                   <th className="text-right px-5 py-3">Sale Rate</th>
@@ -752,7 +783,14 @@ export default function Inventory() {
                 {filteredProducts.map(p => (
                   <tr key={p.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-5 py-3">
-                      <div className="font-medium text-gray-800">{p.name}</div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="font-medium text-gray-800">{p.name}</div>
+                        {p.is_no_return && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600 border border-red-200">
+                            NO RETURN
+                          </span>
+                        )}
+                      </div>
 
                       {p.company && (
                         <div className="text-xs text-teal-600 mt-0.5 font-medium">
@@ -766,6 +804,7 @@ export default function Inventory() {
                         </div>
                       )}
                     </td>
+                    <td className="px-5 py-3 text-gray-500 font-mono text-xs">{p.item_code || '—'}</td>
                     <td className="px-5 py-3">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${categoryColor(p.category)}`}>
                         {p.category || 'Uncategorized'}

@@ -24,6 +24,7 @@ function newItem(): InvoiceItem {
     cgstRate: 9,
     sgstRate: 9,
     igstRate: 0,
+    isNoReturn: false,
   };
 }
 
@@ -88,6 +89,7 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
     const rate = Number(product.rate);
     const disc = orig > 0 ? Math.round(((orig - rate) / orig) * 10000) / 100 : 0;
     updateItem(itemId, {
+      itemCode: product.item_code || '',
       name: product.name,
       hsnSac: product.hsn_sac || '',
       rate: rate,
@@ -95,7 +97,17 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
       unit: product.unit,
       discount: disc,
       qty: 1,
+      isNoReturn: !!product.is_no_return,
     });
+  };
+
+  // Look up a product purely by its item code and fill the whole row in one go —
+  // this is what lets someone just type/scan a code and have the bill populate itself.
+  const selectProductByCode = (itemId: string, code: string) => {
+    const trimmed = code.trim();
+    if (!trimmed) return;
+    const match = products.find(p => (p.item_code || '').trim().toLowerCase() === trimmed.toLowerCase());
+    if (match) selectProduct(itemId, match);
   };
 
   return (
@@ -333,7 +345,14 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
           {data.items.map((item, idx) => (
             <div key={item.id} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-gray-500">Item #{idx + 1}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-gray-500">Item #{idx + 1}</span>
+                  {item.isNoReturn && (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600 border border-red-200">
+                      NO RETURN
+                    </span>
+                  )}
+                </div>
                 <button
                   onClick={() => removeItem(item.id)}
                   className="text-red-400 hover:text-red-600 transition-colors"
@@ -349,7 +368,15 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
                     className={inputCls()}
                     value={item.itemCode}
                     onChange={(e) => updateItem(item.id, { itemCode: e.target.value })}
-                    placeholder="EX-1001"
+                    onBlur={(e) => selectProductByCode(item.id, e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        selectProductByCode(item.id, (e.target as HTMLInputElement).value);
+                      }
+                    }}
+                    placeholder="Type code, e.g. EX-1001 ↵"
+                    title="Type a product's item code and press Enter/Tab — the rest of the row fills in automatically."
                   />
                 </div>
                 <div className="col-span-2">
@@ -485,6 +512,15 @@ export default function InvoiceForm({ data, onChange, products }: Props) {
                   />
                 </div>
               </div>
+              <label className="mt-2 flex items-center gap-1.5 cursor-pointer w-fit">
+                <input
+                  type="checkbox"
+                  className="h-3.5 w-3.5 accent-red-600 cursor-pointer"
+                  checked={!!item.isNoReturn}
+                  onChange={e => updateItem(item.id, { isNoReturn: e.target.checked })}
+                />
+                <span className="text-xs font-medium text-red-600">Mark as No Return item</span>
+              </label>
             </div>
           ))}
         </div>

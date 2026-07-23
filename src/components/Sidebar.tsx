@@ -1,4 +1,4 @@
-import { LayoutDashboard, FileText, Package, Users, Zap, BarChart3, X, LucideIcon } from 'lucide-react';
+import { LayoutDashboard, FileText, Package, Users, BarChart3, X, LucideIcon } from 'lucide-react';
 
 export type Page = 'dashboard' | 'invoice' | 'inventory' | 'customers' | 'reports';
 

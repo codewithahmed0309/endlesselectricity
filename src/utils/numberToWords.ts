@@ -48,5 +48,5 @@ export function numberToWords(amount: number): string {
     result += ' and ' + twoDigits(paise) + ' Paise';
   }
 
-  return 'INR ' + result + ' Only';
+  return result + ' Only';
 }
