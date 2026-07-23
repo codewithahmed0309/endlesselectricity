@@ -312,12 +312,16 @@ the truthful, and the martyrs."
             <td className={CELL}>
               <div className="flex justify-between items-start gap-2">
                 <div>
-                  <div className="font-semibold">Company's Bank Details</div>
-                  <div>Bank Name: {data.bankDetails.bankName}</div>
-                  <div>A/c No.: {data.bankDetails.accountNumber}</div>
-                  <div>Branch &amp; IFSC Code: {data.bankDetails.branch} &amp; {data.bankDetails.ifscCode}</div>
-                  {data.bankDetails.upiId && <div>UPI ID: {data.bankDetails.upiId}</div>}
-                </div>
+                 <div>
+  <div className="font-semibold">Company's Bank Details</div>
+
+  <div>Bank Name:BANK OF BARODA</div>
+
+  <div>A/c No.: 40510200000210</div>
+  <div>IFSC Code: BARB0BAKROL</div>
+
+  <div>UPI ID: endlesselectrical@oksbi</div>
+</div>
                 <div className="flex-shrink-0 text-center" style={{ fontSize: '7.5px' }}>
                   <div
                     className="border border-black flex items-center justify-center bg-white"
@@ -347,9 +351,14 @@ the truthful, and the martyrs."
         </tbody>
       </table>
 
-      <div className="text-center border border-black border-t-0 py-1" style={{ fontSize: '9px' }}>
-        This is a Computer Generated Invoice
-      </div>
+     <div
+  className="text-center border border-black border-t-0 py-1"
+  style={{ fontSize: '9px' }}
+>
+  <strong>SUBJECT TO ANAND JURISDICTION</strong>
+  <br />
+  This is a Computer Generated Invoice
+</div>
     </div>
   );
 });
