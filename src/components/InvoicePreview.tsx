@@ -312,15 +312,13 @@ ANAND, GUJARAT 388001`}
               <div><span className={LBL}>Company's PAN</span> &nbsp; {data.companyPan}</div>
               <div className="mt-1 font-semibold">Declaration</div>
               <div style={{ fontSize: '8px' }} className="leading-snug">
-                "We conduct our business in accordance with the teachings of Islam,
-                striving for honesty, fairness, and trust in every transaction."
-                <br />
-                "Give full measure and weight with justice."
-                — Surah Hud (11:85)
-                <br />
-                "The truthful and trustworthy merchant will be with the Prophets,
-                the truthful, and the martyrs."
-                — Jami' at-Tirmidhi 1209
+                <>
+  Thank you for your purchase.
+  <br />
+  Please retain this invoice for future reference.
+  <br /><br />
+  Products eligible for return or replacement must be reported within <strong>3 days</strong> of delivery and should be returned in their original condition and packaging.
+</>
                 {data.specialNotes && (<><br /><b>Note:</b> {data.specialNotes}</>)}
               </div>
             </td>
