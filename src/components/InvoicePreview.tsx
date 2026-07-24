@@ -118,14 +118,11 @@ const InvoicePreview = React.forwardRef<HTMLDivElement, Props>(({ data }, ref) =
                   <div className="font-bold" style={{ fontSize: '13px' }}>
                     ENDLESS ELECTRICAL
                   </div>
-
-                  <div className="mt-0.5">
-                    G/F 0.7,K-10,ARCADE,100ft ROAD,OPP DIYA CINEMA ANAND
-                  </div>
-
-                  <div>
-                    GUJARAT - 388001
-                  </div>
+<div className="whitespace-pre-line">
+{`G/F, 7, K-10 ARCADE,
+OPP DIYA CINEMA,
+ANAND, GUJARAT 388001`}
+</div>
 
                   <div>
                     GSTIN/UIN: 24AFQPV8836E1ZU
